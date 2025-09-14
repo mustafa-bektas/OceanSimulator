@@ -3,7 +3,7 @@ Shader "Custom/WaterShader_FBM"
     Properties
     {
         _Amplitude ("Wave Amplitude", Range(0, 10)) = 0.5
-        _Frequency ("Wave Frequency", Range(0, 20)) = 2.0
+        _Frequency ("Wave Frequency", Range(0, 40)) = 2.0
         _Speed ("Wave Speed", Range(0, 5)) = 1.0
         _MaxPeak ("Max Peak", Range(0.1, 10.0)) = 1.6
         _PeakOffset ("Peak Offset", Range(0.0, 8.0)) = 1.6
