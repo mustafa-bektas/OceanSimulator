@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WaterMaterial
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: 4800000, guid: 26e5d67f7e658f54eaa6d86a0a55484b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -17,8 +17,7 @@ Material:
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Opaque
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -86,6 +85,7 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _Amplitude: 2.3
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -94,24 +94,46 @@ Material:
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
+    - _DetailFrequency: 23.3
     - _DetailNormalMapScale: 1
+    - _DetailOctaves: 1
+    - _DetailStrength: 0.99
+    - _Drag: 0.005
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _Frequency: 20
+    - _FresnelBias: 0.098
+    - _FresnelShininess: 3.31
+    - _FresnelStrength: 0.23
+    - _Gain: 0.5
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _Lacunarity: 1.14
+    - _MaxPeak: 4.08
     - _Metallic: 0
+    - _NormalStrength: 3
     - _OcclusionStrength: 1
+    - _Octaves: 36.3
     - _Parallax: 0.005
+    - _PeakOffset: 2.9
+    - _Persistence: 0.802
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _SeedIter: 1.41
+    - _Shininess: 38.2
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _SpecularStrength: 2
+    - _Speed: 1.45
+    - _SpeedRamp: 0.83
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
+    - _Steepness: 1
     - _Surface: 0
+    - _TipAttenuation: 1.7
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
@@ -120,6 +142,12 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _SpecularColor: {r: 1, g: 0.8108703, b: 0, a: 1}
+    - _TipColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WaterColor: {r: 0.09999997, g: 0.39999998, b: 1, a: 1}
+    - _WaveDirection: {r: 1, g: 0, b: 0.5, a: 0}
+    - _WaveDirection2: {r: 0.5, g: 0, b: 1, a: 0}
+    - _WindDirection: {r: 0.83, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &2467876949309304954

@@ -2,11 +2,11 @@ Shader "Custom/WaterShader_FBM"
 {
     Properties
     {
-        _Amplitude ("Wave Amplitude", Range(0, 3)) = 0.5
+        _Amplitude ("Wave Amplitude", Range(0, 10)) = 0.5
         _Frequency ("Wave Frequency", Range(0, 20)) = 2.0
         _Speed ("Wave Speed", Range(0, 5)) = 1.0
-        _MaxPeak ("Max Peak", Range(0.1, 3.0)) = 1.6
-        _PeakOffset ("Peak Offset", Range(0.0, 2.0)) = 1.6
+        _MaxPeak ("Max Peak", Range(0.1, 10.0)) = 1.6
+        _PeakOffset ("Peak Offset", Range(0.0, 8.0)) = 1.6
         _Drag ("Wave Drag", Range(0.0, 1.0)) = 0.23
         _SpecularColor ("Specular Color", Color) = (1,1,1,1)
         _Shininess ("Shininess", Range(1, 100)) = 32
@@ -17,6 +17,11 @@ Shader "Custom/WaterShader_FBM"
         _SpeedRamp ("Speed Ramp", Range(0.0, 2.0)) = 1.2
         _SeedIter ("Seed Iteration", Range(0.1, 2.0)) = 1.18
         _NormalStrength ("Normal Strength", Range(0.0,5.0)) = 1
+        _FresnelBias ("Fresnel Bias", Range(0, 1)) = 0.02
+        _FresnelStrength ("Fresnel Strength", Range(0, 2)) = 1.0
+        _FresnelShininess ("Fresnel Shininess", Range(1, 10)) = 5.0
+        _TipColor ("Wave Tip Color", Color) = (1,1,1,1)
+        _TipAttenuation ("Tip Attenuation", Range(0.1, 5.0)) = 2.0
     }
 
     SubShader
@@ -39,8 +44,8 @@ Shader "Custom/WaterShader_FBM"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float3 normal : NORMAL;
                 float3 worldPos : TEXCOORD0;
+                float3 objectPos : TEXCOORD1;
             };
 
             float _Amplitude;
@@ -58,6 +63,12 @@ Shader "Custom/WaterShader_FBM"
             float _SpeedRamp;
             float _SeedIter;
             float _NormalStrength;
+            float _FresnelBias;
+            float _FresnelStrength;
+            float _FresnelShininess;
+            float _TipColor;
+            float _TipAttenuation;
+
             
             float2 getDirectionForSeed(float seed)
             {
@@ -115,10 +126,8 @@ Shader "Custom/WaterShader_FBM"
                 float3 fbmResult = vertexFBM(v.vertex.xyz);
                 v.vertex.y += fbmResult.x;
                 
-                float3 objectNormal = normalize(float3(-fbmResult.y * _NormalStrength, 1.0, -fbmResult.z * _NormalStrength));
-                o.normal = UnityObjectToWorldNormal(objectNormal);
-                
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.objectPos = v.vertex.xyz; // Pass original position for normal calculation
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 
                 return o;
@@ -126,22 +135,51 @@ Shader "Custom/WaterShader_FBM"
             
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 normal = normalize(i.normal);
+                // Calculate normals in fragment shader
+                float eps = 0.0001; // Sampling distance
+                float3 pos = i.objectPos;
+                
+                // Sample height at neighboring points
+                float hL = vertexFBM(pos + float3(-eps, 0, 0)).x;
+                float hR = vertexFBM(pos + float3(eps, 0, 0)).x;
+                float hD = vertexFBM(pos + float3(0, 0, -eps)).x;
+                float hU = vertexFBM(pos + float3(0, 0, eps)).x;
+                
+                // Calculate gradient
+                float3 objectNormal = normalize(float3(
+                    (hL - hR) / (2.0 * eps) * _NormalStrength,
+                    1.0,
+                    (hD - hU) / (2.0 * eps) * _NormalStrength
+                ));
+                
+                float3 normal = normalize(UnityObjectToWorldNormal(objectNormal));
                 
                 float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
                 float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
                 float3 halfwayDir = normalize(lightDir + viewDir);
+                
                 float NdotL = max(0, dot(normal, lightDir));
-                float NdotH = max(0, dot(normal, halfwayDir));
-                float specular = pow(NdotH, _Shininess) * _SpecularStrength;
                 
-                fixed3 waterColor = fixed3(0.0, 0.4, 1.0);
+                // Schlick Fresnel
+                float base = 1.0 - dot(viewDir, normal);
+                float fresnel = pow(base, _FresnelShininess);
+                fresnel = fresnel + _FresnelBias * (1.0 - fresnel);
+                fresnel *= _FresnelStrength;
+                
+                // Basic water color with fresnel
+                fixed3 waterColor = fixed3(0.0, 0.25, 0.65);
                 fixed3 ambient = waterColor * 0.15;
-                fixed3 diffuse = waterColor * NdotL;
-                fixed3 specularReflection = _SpecularColor.rgb * specular;
+                fixed3 diffuse = waterColor * NdotL * (1.0 - fresnel);
                 
-                fixed3 finalColor = ambient + diffuse + specularReflection;
+                // Specular with fresnel
+                float NdotH = max(0, dot(normal, halfwayDir));
+                float spec = pow(NdotH, _Shininess) * NdotL;
+                fixed3 specular = _SpecularColor.rgb * spec * fresnel * _SpecularStrength;
                 
+                // Simple fresnel reflection (sky color)
+                fixed3 fresnelColor = fixed3(0.7, 0.9, 1.0) * fresnel;
+                
+                fixed3 finalColor = ambient + diffuse + specular + fresnelColor;
                 return fixed4(finalColor, 1.0);
             }
             ENDCG
