@@ -2,7 +2,7 @@
 
 **by Mustafa Bektaş**
 
-An exploration of ocean surface rendering techniques
+An exploration of ocean surface rendering techniques without using any built-in unity tools
 
 ![Ocean Demo](demo/demo.gif)
 
